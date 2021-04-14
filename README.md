@@ -20,14 +20,14 @@ Changelog Automation Explore and Analysis
 
 ## Intro
 
-- Conventional Commits are a method of formatting git commit messages.
+- Conventional Commits are a standard method of formatting git commit messages.
   - Able to determine version (Major.Minor.Patch) of the next release based on commit messages since the last release.
   - [Conventional Commit Specification](https://www.conventionalcommits.org/en/v1.0.0/#specification)
 - EdgeX adopted Conventional Commits on all repositories in H2 2020. 
   - [EdgeX Committing Code Guidelines](https://wiki.edgexfoundry.org/display/FA/Committing+Code+Guidelines#CommittingCodeGuidelines-ConventionalCommits)
 - Conventional Commits enables changelog automation that can be done at release time or after any new PR is merged (ongoing).
   
-**This demo was run with: [app-functions-sdk-go@v2.0.0-dev.43](https://github.com/edgexfoundry/app-functions-sdk-go/tree/v2.0.0-dev.43)**
+**This demo was run from a forked: [app-functions-sdk-go@v2.0.0-dev.43](https://github.com/edgexfoundry/app-functions-sdk-go/tree/v2.0.0-dev.43)**
 
 ## git-chglog
 
@@ -37,11 +37,12 @@ GitHub: <https://github.com/git-chglog/git-chglog>
 
 - Lightweight, single binary application written in golang.
 - Inspired by [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog) project
-- Docker image supported
+- Docker image provided.
 
 ### Configuration
 
 Config File (default settings): `/app-functions-sdk-go/.chglog/config.yaml`.
+
 #### **`config.yaml`**
 
 ```yaml
@@ -91,6 +92,14 @@ Output Notes:
 
 - Chronological ordering.
 - Unreleased commits (pre-release tags) are all separated. When release occurs the next run of git-chglog will then group the unreleased versions together under the proper released version. (In this example, v2.0.0-dev-1 .. v2.0.0-dev43 will be under v2.0.0)
+- Shows the PR # but not the linked issue # it closes.
+- Flexible argument parameters to automate specific ranges that we'd like:
+
+```bash
+git-chglog 1.0.0..2.0.0
+```
+
+
 
 ## semantic-release
 
@@ -144,9 +153,19 @@ docker run -w /app -v $(pwd):/app gtramontina/semantic-release:17.4.2
 
 Output Notes:
 
-- TBD
-
+- Only creates changelog for the released version, does not have a "running" list of changes from prior releases.
+- Doesn't seem to support creating a changelog from TagA to TagB.
+- Shows the PR **and** which Issue # it closes if described in PR.
+- BREAKING CHANGES show lots of "Signed-off-by: ..." messages as part of the changelog.
 
 ## Next Steps
 
-- TBD
+1) When do we create the changelog?
+
+   - At release time? Changelog would be summary of all changes since last release. (e.g. add automation to the edgexrelease function in edgex-global-pipelines)
+   - At build time? Changelog generated as PR gets built onto `main/master`. (e.g. add automation to the edgexBuild*.groovy pipelines within edgex-global-pipelines)
+
+2) What does the automation do with the created changelog?
+
+    - Commit back to the repository?
+    - Upload the changelog?
