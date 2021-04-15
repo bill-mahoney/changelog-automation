@@ -10,6 +10,7 @@ Changelog Automation Explore and Analysis
       - [**`config.yaml`**](#configyaml)
     - [Execution](#execution)
     - [Output](#output)
+      - [**`git-chglog-changelog.yaml`**](#git-chglog-changelogyaml)
   - [semantic-release](#semantic-release)
     - [Summary](#summary-1)
     - [Configuration](#configuration-1)
@@ -25,7 +26,7 @@ Changelog Automation Explore and Analysis
   - [Conventional Commit Specification](https://www.conventionalcommits.org/en/v1.0.0/#specification)
 - EdgeX adopted Conventional Commits on all repositories in H2 2020. 
   - [EdgeX Committing Code Guidelines](https://wiki.edgexfoundry.org/display/FA/Committing+Code+Guidelines#CommittingCodeGuidelines-ConventionalCommits)
-- Conventional Commits enables changelog automation that can be done at release time or after any new PR is merged (ongoing).
+- Conventional Commits enables changelog generation automation.
   
 **This demo was run from a forked: [app-functions-sdk-go@v2.0.0-dev.43](https://github.com/edgexfoundry/app-functions-sdk-go/tree/v2.0.0-dev.43)**
 
@@ -38,6 +39,8 @@ GitHub: <https://github.com/git-chglog/git-chglog>
 - Lightweight, single binary application written in golang.
 - Inspired by [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog) project
 - Docker image provided.
+- Pre-release (e.g. v2.0.0-dev-8) tags are treated as a "released" tag and cause a [confusing changelog](git-chglog-changelog-withprereleasetags.md).
+- Removing the pre-release tags on the local repository before running the changelog creates the expected outcome.
 
 ### Configuration
 
@@ -81,25 +84,26 @@ options:
 ```bash
 git clone git@github.com:edgexfoundry/app-functions-sdk-go.git
 cd app-functions-sdk-go
-docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog --output git-chglog-changelog.md
+git tag | grep dev | xargs -n 1 -i% git tag -d %
+docker run -v "$PWD":/workdir quay.io/git-chglog/git-chglog --next-tag v2.0.0 --sort semver --output git-chglog-changelog.md
 ```
 
 ### Output
 
-[git-chglog-changelog.md](git-chglog-changelog.md)
+#### **`git-chglog-changelog.yaml`**
+
+Generated Changelog: [git-chglog-changelog.md](git-chglog-changelog.md)
 
 Output Notes:
 
-- Chronological ordering.
-- Unreleased commits (pre-release tags) are all separated. When release occurs the next run of git-chglog will then group the unreleased versions together under the proper released version. (In this example, v2.0.0-dev-1 .. v2.0.0-dev43 will be under v2.0.0)
+- `--sort semver` Sorts with semver, default is chronological ordering.
+- `--next-tag` option can be used to assign unreleased tags to a version.
 - Shows the PR # but not the linked issue # it closes.
 - Flexible argument parameters to automate specific ranges that we'd like:
 
 ```bash
 git-chglog 1.0.0..2.0.0
 ```
-
-
 
 ## semantic-release
 
@@ -111,7 +115,7 @@ GitHub <https://github.com/semantic-release/changelog>
 - [changelog](https://github.com/semantic-release/changelog) is a plugin for semantic-release to automate changelog generation
 - Heavy weight solution for just changelog. Much more intrusive.
   - Requires write permission to the repo before a changelog can be created.
-  - Release **must** be done before a changelog can be created. Tagging the releaase is required before a changelog can be generated.
+  - Release **must** be done before a changelog can be created. Tagging the release is required before a changelog can be generated.
     - Can do some hacks with a local on-disk remote as a workaround. Spotify [argued](https://github.com/semantic-release/semantic-release/issues/964) with maintainers to add feature with no luck.
 - Semantic-release doesn't have an official docker container.
 
@@ -120,6 +124,7 @@ GitHub <https://github.com/semantic-release/changelog>
 Configured within the standard semantic release configuration file `/app-functions-sdk-go/.releaserc` that lives at the root of the repository.
 
 #### **`.releaserc`**
+
 ```json
 {
   "noVerify": true,
@@ -141,6 +146,7 @@ Configured within the standard semantic release configuration file `/app-functio
 ```
 
 ### Execution
+
 ```bash
 git clone git@github.com:edgexfoundry/app-functions-sdk-go.git
 cd app-functions-sdk-go
@@ -169,3 +175,6 @@ Output Notes:
 
     - Commit back to the repository?
     - Upload the changelog?
+
+3) How much should we automate?
+    - Manual PR creation and execution against all the repositories?
