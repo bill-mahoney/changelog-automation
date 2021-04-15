@@ -17,6 +17,7 @@ Changelog Automation Explore and Analysis
       - [**`.releaserc`**](#releaserc)
     - [Execution](#execution-1)
     - [Output](#output-1)
+      - [**`semantic-release-changelog.yaml`**](#semantic-release-changelogyaml)
   - [Next Steps](#next-steps)
 
 ## Intro
@@ -155,7 +156,9 @@ docker run -w /app -v $(pwd):/app gtramontina/semantic-release:17.4.2
 
 ### Output
 
-[semantic-release-changelog.md](semantic-release-changelog.md)
+#### **`semantic-release-changelog.yaml`**
+
+Generated Changelog: [semantic-release-changelog.md](semantic-release-changelog.md)
 
 Output Notes:
 
